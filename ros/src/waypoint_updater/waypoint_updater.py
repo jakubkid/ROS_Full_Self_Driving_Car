@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
 from scipy.spatial import KDTree
+import numpy as np
 
 import math
 
@@ -42,7 +43,7 @@ class WaypointUpdater(object):
 	self.base_waypoints = None
 	self.waypoints_2d = None
 	self.waypoint_tree = None
-
+	print("START LOOOP")
         self.loop()
 
     def loop(self):
