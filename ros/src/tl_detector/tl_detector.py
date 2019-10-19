@@ -7,6 +7,7 @@ from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
+from scipy.spatial import KDTree
 import tf
 import cv2
 import yaml
@@ -20,6 +21,8 @@ class TLDetector(object):
         self.pose = None
         self.waypoints = None
         self.camera_image = None
+        self.waypoints2d = None
+        self.waypointTree = None
         self.lights = []
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
@@ -56,6 +59,11 @@ class TLDetector(object):
 
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
+    def waypoints_cb(self, waypoints):
+        self.waypoints = waypoints
+        if not self.waypoints2d:
+            self.waypoints2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
+            self.waypointTree = KDTree(self.waypoints2d)
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
@@ -83,14 +91,18 @@ class TLDetector(object):
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
-            light_wp = light_wp if state == TrafficLight.RED else -1
+            #TODO update with yellow light
+            if state == TrafficLight.RED:
+                light_wp = light_wp 
+            else:
+                light_wp = -1
             self.last_wp = light_wp
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
-    def get_closest_waypoint(self, pose):
+    def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -100,7 +112,7 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-        #TODO implement
+        closestIdx = self.waypointTree.query([x, y], 1)[1]
         return 0
 
     def get_light_state(self, light):
@@ -113,6 +125,8 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+        #for testing, just return light state (will only work in simulator)
+        return light.state
         if(not self.has_image):
             self.prev_light_loc = None
             return False
@@ -131,19 +145,31 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        light = None
+        closestLight = None
+        lineIdx = None #Stop line waypoint index from waypoint list
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
-        if(self.pose):
-            car_position = self.get_closest_waypoint(self.pose.pose)
+        if self.pose:
+            carPos = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
-        #TODO find the closest visible traffic light (if one exists)
+            #find the closest visible traffic light (if one exists)
+            # for larger map we could use KDtree inestead of loop
+            diffIdx = len(self.waypoints.waypoints)
+            for (linePos, lightPos) in enumerate(zip(stop_line_positions, self.lights)):
+                #Get stop line waypoint index
+                closestWp = self.get_closest_waypoint(linePos[0], linePos[1])
+                #Check if this index is in front of a car and is closer than previous
+                dIdx = closestWp - carPos
+                if dIdx > 0 and dIdx < diffIdx:
+                    diffIdx = dIdx
+                    closestLight = lightPos
+                    lineIdx = closestWp
 
-        if light:
-            state = self.get_light_state(light)
-            return light_wp, state
-        self.waypoints = None
+        if closestLight:
+            state = self.get_light_state(closestLight)
+            return lineIdx, state
+        # self.waypoints = None is it necessary?
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
