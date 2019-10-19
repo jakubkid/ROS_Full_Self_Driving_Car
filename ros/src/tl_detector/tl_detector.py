@@ -59,8 +59,6 @@ class TLDetector(object):
 
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
-    def waypoints_cb(self, waypoints):
-        self.waypoints = waypoints
         if not self.waypoints2d:
             self.waypoints2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypointTree = KDTree(self.waypoints2d)
@@ -113,7 +111,7 @@ class TLDetector(object):
 
         """
         closestIdx = self.waypointTree.query([x, y], 1)[1]
-        return 0
+        return closestIdx
 
     def get_light_state(self, light):
         """Determines the current color of the traffic light
@@ -151,16 +149,17 @@ class TLDetector(object):
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
         if self.pose:
-            carPos = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
+            carPosIdx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             #find the closest visible traffic light (if one exists)
             # for larger map we could use KDtree inestead of loop
             diffIdx = len(self.waypoints.waypoints)
-            for (linePos, lightPos) in enumerate(zip(stop_line_positions, self.lights)):
+            for (linePos, lightPos) in zip(stop_line_positions, self.lights):
+
                 #Get stop line waypoint index
                 closestWp = self.get_closest_waypoint(linePos[0], linePos[1])
                 #Check if this index is in front of a car and is closer than previous
-                dIdx = closestWp - carPos
+                dIdx = closestWp - carPosIdx
                 if dIdx > 0 and dIdx < diffIdx:
                     diffIdx = dIdx
                     closestLight = lightPos
