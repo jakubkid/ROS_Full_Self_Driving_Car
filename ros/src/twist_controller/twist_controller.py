@@ -13,8 +13,8 @@ class Controller(object):
         kp = 0.3
         ki = 0.1
         kd = 0
-        minThr = 0   #Minimum throttle value
-        maxThr = 0.2 #Maximum Throttle value TODO should be accLimit?
+        minThr = 0. #Minimum throttle value
+        maxThr = 1. #Maximum Throttle value
         self.throttleControler = PID(kp, ki, kd, minThr, maxThr)
 
         tau = 0.5 # 1/(2pi*tau) = cutoff frequency
@@ -52,7 +52,7 @@ class Controller(object):
             throttle = 0;
             brake = 400 #Nm - to hold the car in place
         # TODO this could be done by converting PID output to Nm?
-        elif throttle < 0.1 and vel_error < 0:
+        elif throttle < 0.1 and velError < 0:
             throttle = 0
             decel = max(velError, self.decLimit)
             brake = abs(decel) * self.vehicleMass * self.wheelRadius # breaking in N*m
