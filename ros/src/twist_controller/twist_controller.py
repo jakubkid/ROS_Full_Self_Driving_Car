@@ -12,7 +12,7 @@ class Controller(object):
                        wheelRadius, wheelBase, steerRatio, maxLatAcc, maxSteerAngle):
         kp = 0.3
         ki = 0.1
-        kd = 0
+        kd = 0.05
         minThr = 0. #Minimum throttle value
         maxThr = 1. #Maximum Throttle value
         self.throttleControler = PID(kp, ki, kd, minThr, maxThr)

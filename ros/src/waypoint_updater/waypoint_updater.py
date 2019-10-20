@@ -26,6 +26,8 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+PREDEF_PATH_STOP = 5 # Number of waypoints with predefined path before traffic light
+PREDEF_PATH_SPEED = PREDEF_PATH_STOP-1.5 # Stop speed at start of predefined path 
 
 
 class WaypointUpdater(object):
@@ -91,34 +93,42 @@ class WaypointUpdater(object):
         return lane
 
     def decelerate_waypoints(self, waypoints, closestIdx):
-        neededDec = 0
+        neededDec = 0.0
         currVel = self.currVel
-        dist = 0
+        dist = 0.0
         # 2 is to stop infront of the line
         stopIdx = max(self.stopLineWpIdx - closestIdx - 2, 0)
         #check if we can stop with maximum deceleration
-        if closestIdx > 0:
-            dist = self.distance(waypoints, 0, stopIdx)
-        if dist > 0:
-            neededDec = -(currVel * currVel) / (2 * dist)
-        else:
-            neededDec = self.decLimit - 1.0 # not possible to decelerate anymore
-        # check if car is already stopped
-        if currVel < 1.0 and stopIdx < 1:
-            neededDec = 0
-        if neededDec >= self.decLimit:
+        if stopIdx > PREDEF_PATH_STOP:
+            dist = self.distance(waypoints, 0, stopIdx-PREDEF_PATH_STOP)
+            # add current distance from the car to starting waypoint
+            start = waypoints[0].pose.pose.position
+            carPose = self.pose.pose.position
+            dist += math.sqrt((start.x-carPose.x)**2 + (start.y-carPose.y)**2  + (start.z-carPose.z)**2)
+        if dist > 0.0:
+            #aim to achieve exactly the same speed as number of waypoints with predefined path
+            velDiff = currVel - PREDEF_PATH_SPEED
+            if velDiff > 0.0:
+                neededDec = -(velDiff * velDiff) / (2 * dist)
+            else:
+                neededDec = 0.0
+        # check if we can still break the car, remember about predefined stop curve for last points
+        if neededDec >= self.decLimit or (stopIdx <= PREDEF_PATH_STOP and currVel > (2*PREDEF_PATH_SPEED)):
             newWpList = copy.deepcopy(waypoints)
             #print("newList")
             for i in range(len(newWpList)):
-                if stopIdx - i > 1:
-                    dist = self.distance(newWpList, i, stopIdx)
-                    vel = math.sqrt(2* (-neededDec) * dist)
-                    if vel < 1.0:
-                        vel = 5.0
+                numToStop = (stopIdx - i)
+                if numToStop >= PREDEF_PATH_STOP:
+                    dist = self.distance(newWpList, i, stopIdx-PREDEF_PATH_STOP)
+                    vel = PREDEF_PATH_SPEED + math.sqrt(2* (-neededDec) * dist)
+                    print("dist: ", dist, " vel: ", vel)
+                elif numToStop > 1: # 1 not 0 because sometimes index baunces and car starts driving even though it is red
+                    vel = numToStop - 1.5
+                    print(" vel: ", vel)
                 else:
-                    vel = 0
+                    vel = 0.0
                 #print(vel)
-                self.set_waypoint_velocity(newWpList, i, vel)
+                self.set_waypoint_velocity(newWpList, i, min(vel, self.get_waypoint_velocity(newWpList[i])))
 
             return newWpList
         
