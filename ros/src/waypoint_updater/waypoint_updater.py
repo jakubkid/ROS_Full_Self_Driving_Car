@@ -28,7 +28,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 PREDEF_PATH_STOP = 5 # Number of waypoints with predefined path before traffic light
 PREDEF_PATH_SPEED = PREDEF_PATH_STOP-1.5 # Stop speed at start of predefined path 
-
+BRAKE_MARGIN = 0.8 # What part of maximum braking we should use in normal circumstances
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -106,14 +106,14 @@ class WaypointUpdater(object):
             carPose = self.pose.pose.position
             dist += math.sqrt((start.x-carPose.x)**2 + (start.y-carPose.y)**2  + (start.z-carPose.z)**2)
         if dist > 0.0:
-            #aim to achieve exactly the same speed as number of waypoints with predefined path
+            #aim to achieve predefined speed
             velDiff = currVel - PREDEF_PATH_SPEED
             if velDiff > 0.0:
                 neededDec = -(velDiff * velDiff) / (2 * dist)
             else:
                 neededDec = 0.0
         # check if we can still break the car, remember about predefined stop curve for last points
-        if neededDec >= self.decLimit or (stopIdx <= PREDEF_PATH_STOP and currVel > (2*PREDEF_PATH_SPEED)):
+        if neededDec >= self.decLimit or (stopIdx <= PREDEF_PATH_STOP and currVel < (2*PREDEF_PATH_SPEED)):
             newWpList = copy.deepcopy(waypoints)
             #print("newList")
             for i in range(len(newWpList)):
