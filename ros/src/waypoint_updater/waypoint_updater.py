@@ -107,20 +107,24 @@ class WaypointUpdater(object):
             dist += math.sqrt((start.x-carPose.x)**2 + (start.y-carPose.y)**2  + (start.z-carPose.z)**2)
         if dist > 0.0:
             #aim to achieve predefined speed
-            velDiff = currVel - PREDEF_PATH_SPEED
-            if velDiff > 0.0:
-                neededDec = -(velDiff * velDiff) / (2 * dist)
+            if currVel > PREDEF_PATH_SPEED:
+                neededDec = (PREDEF_PATH_SPEED**2 - currVel**2) / (2 * dist)
             else:
                 neededDec = 0.0
-        # check if we can still break the car, remember about predefined stop curve for last points
-        if neededDec >= self.decLimit or (stopIdx <= PREDEF_PATH_STOP and currVel < (2*PREDEF_PATH_SPEED)):
+        # check if we can still break the car
+        if (stopIdx <= PREDEF_PATH_STOP and currVel > (2*PREDEF_PATH_SPEED)):
+            # We cannot break anymore continue
+            print("neededDec: ", neededDec, " stopIdx: ", stopIdx, " currVel: ", currVel)
+            return waypoints
+        else:
             newWpList = copy.deepcopy(waypoints)
-            #print("newList")
+            brakeDec = BRAKE_MARGIN * self.decLimit 
+            print("brakeDec", brakeDec)
             for i in range(len(newWpList)):
                 numToStop = (stopIdx - i)
                 if numToStop >= PREDEF_PATH_STOP:
                     dist = self.distance(newWpList, i, stopIdx-PREDEF_PATH_STOP)
-                    vel = PREDEF_PATH_SPEED + math.sqrt(2* (-neededDec) * dist)
+                    vel = math.sqrt(2* (-brakeDec) * dist + PREDEF_PATH_SPEED**2)
                     print("dist: ", dist, " vel: ", vel)
                 elif numToStop > 1: # 1 not 0 because sometimes index baunces and car starts driving even though it is red
                     vel = numToStop - 1.5
@@ -129,12 +133,9 @@ class WaypointUpdater(object):
                     vel = 0.0
                 #print(vel)
                 self.set_waypoint_velocity(newWpList, i, min(vel, self.get_waypoint_velocity(newWpList[i])))
-
             return newWpList
         
-        # We cannot break anymore continue
-        print("Continue")
-        return waypoints
+ 
                 
     def pose_cb(self, msg):
         self.pose = msg
