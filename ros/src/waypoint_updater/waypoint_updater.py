@@ -27,7 +27,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 PREDEF_PATH_STOP = 5 # Number of waypoints with predefined path before traffic light
-PREDEF_PATH_SPEED = PREDEF_PATH_STOP-1.5 # Stop speed at start of predefined path 
+PREDEF_PATH_SPEED = PREDEF_PATH_STOP-0.5 # Stop speed at start of predefined path 
 BRAKE_MARGIN = 0.8 # What part of maximum braking we should use in normal circumstances
 
 class WaypointUpdater(object):
@@ -96,8 +96,8 @@ class WaypointUpdater(object):
         neededDec = 0.0
         currVel = self.currVel
         dist = 0.0
-        # 2 is to stop infront of the line
-        stopIdx = max(self.stopLineWpIdx - closestIdx - 2, 0)
+        # 3 is to stop infront of the line
+        stopIdx = max(self.stopLineWpIdx - closestIdx - 3, 0)
         #check if we can stop with maximum deceleration
         if stopIdx > PREDEF_PATH_STOP:
             dist = self.distance(waypoints, 0, stopIdx-PREDEF_PATH_STOP)
@@ -105,6 +105,7 @@ class WaypointUpdater(object):
             start = waypoints[0].pose.pose.position
             carPose = self.pose.pose.position
             dist += math.sqrt((start.x-carPose.x)**2 + (start.y-carPose.y)**2  + (start.z-carPose.z)**2)
+            dist += 2.0 #Allow small delay
         if dist > 0.0:
             #aim to achieve predefined speed
             if currVel > PREDEF_PATH_SPEED:
@@ -112,22 +113,24 @@ class WaypointUpdater(object):
             else:
                 neededDec = 0.0
         # check if we can still break the car
-        if (stopIdx <= PREDEF_PATH_STOP and currVel > (2*PREDEF_PATH_SPEED)):
+        if neededDec < 2*self.decLimit  or (stopIdx <= PREDEF_PATH_STOP and currVel > (2*PREDEF_PATH_SPEED)):
             # We cannot break anymore continue
             print("neededDec: ", neededDec, " stopIdx: ", stopIdx, " currVel: ", currVel)
             return waypoints
         else:
             newWpList = copy.deepcopy(waypoints)
             brakeDec = BRAKE_MARGIN * self.decLimit 
-            print("brakeDec", brakeDec)
+            print("neededDec", neededDec)
             for i in range(len(newWpList)):
                 numToStop = (stopIdx - i)
-                if numToStop >= PREDEF_PATH_STOP:
+                if numToStop <= 1 and currVel < 1.0:
+                    vel = 0.0 # make sure vehicle doesnt creep forward a bit just because of noise
+                elif numToStop >= PREDEF_PATH_STOP:
                     dist = self.distance(newWpList, i, stopIdx-PREDEF_PATH_STOP)
                     vel = math.sqrt(2* (-brakeDec) * dist + PREDEF_PATH_SPEED**2)
                     print("dist: ", dist, " vel: ", vel)
-                elif numToStop > 1: # 1 not 0 because sometimes index baunces and car starts driving even though it is red
-                    vel = numToStop - 1.5
+                elif numToStop > 0:
+                    vel = numToStop - 0.5
                     print(" vel: ", vel)
                 else:
                     vel = 0.0
