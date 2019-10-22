@@ -87,7 +87,6 @@ class WaypointUpdater(object):
         if self.stopLineWpIdx == -1 or self.stopLineWpIdx >= endIdx:
             lane.waypoints = base_waypoints
         else:
-            print("dec")
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closestIdx)
 
         return lane
@@ -120,7 +119,7 @@ class WaypointUpdater(object):
         else:
             newWpList = copy.deepcopy(waypoints)
             brakeDec = BRAKE_MARGIN * self.decLimit 
-            print("neededDec", neededDec)
+            #print("neededDec", neededDec)
             for i in range(len(newWpList)):
                 numToStop = (stopIdx - i)
                 if numToStop <= 1 and currVel < 1.0:
@@ -134,7 +133,6 @@ class WaypointUpdater(object):
                     print(" vel: ", vel)
                 else:
                     vel = 0.0
-                #print(vel)
                 self.set_waypoint_velocity(newWpList, i, min(vel, self.get_waypoint_velocity(newWpList[i])))
             return newWpList
         
