@@ -89,8 +89,7 @@ class TLDetector(object):
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
-            #TODO update with yellow light
-            if state == TrafficLight.RED:
+            if state == TrafficLight.RED or state == TrafficLight.YELLOW:
                 light_wp = light_wp 
             else:
                 light_wp = -1
@@ -123,8 +122,6 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #for testing, just return light state (will only work in simulator)
-        return light.state
         if(not self.has_image):
             self.prev_light_loc = None
             return False
