@@ -22,7 +22,7 @@ class TLClassifier(object):
         # converting from BGR to HSV color space
         hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
         #Crop the image to select only middle traffic signal
-        hsv = hsv[50:550, 350:470]
+        hsv = hsv[50:550, 320:500]
 
         # Detect Red light
         # Range for lower red
@@ -45,5 +45,4 @@ class TLClassifier(object):
         nzCount = cv2.countNonZero(mask1)
         if nzCount > LIGHT_THRESHOLD:
             return TrafficLight.YELLOW
-
         return TrafficLight.UNKNOWN
