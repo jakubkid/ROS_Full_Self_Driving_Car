@@ -90,7 +90,7 @@ class TLDetector(object):
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
             if state == TrafficLight.RED or state == TrafficLight.YELLOW:
-                light_wp = light_wp 
+                light_wp = light_wp
             else:
                 light_wp = -1
             self.last_wp = light_wp
