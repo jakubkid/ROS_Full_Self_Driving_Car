@@ -114,7 +114,7 @@ class WaypointUpdater(object):
         # check if we can still break the car
         if neededDec < 2*self.decLimit  or (stopIdx <= PREDEF_PATH_STOP and currVel > (2*PREDEF_PATH_SPEED)):
             # We cannot break anymore continue
-            print("neededDec: ", neededDec, " stopIdx: ", stopIdx, " currVel: ", currVel)
+            #print("neededDec: ", neededDec, " stopIdx: ", stopIdx, " currVel: ", currVel)
             return waypoints
         else:
             newWpList = copy.deepcopy(waypoints)
@@ -127,10 +127,10 @@ class WaypointUpdater(object):
                 elif numToStop >= PREDEF_PATH_STOP:
                     dist = self.distance(newWpList, i, stopIdx-PREDEF_PATH_STOP)
                     vel = math.sqrt(2* (-brakeDec) * dist + PREDEF_PATH_SPEED**2)
-                    print("dist: ", dist, " vel: ", vel)
+                    #print("dist: ", dist, " vel: ", vel)
                 elif numToStop > 0:
                     vel = numToStop - 0.5
-                    print(" vel: ", vel)
+                    #print(" vel: ", vel)
                 else:
                     vel = 0.0
                 self.set_waypoint_velocity(newWpList, i, min(vel, self.get_waypoint_velocity(newWpList[i])))

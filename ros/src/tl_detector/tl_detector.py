@@ -11,6 +11,7 @@ from scipy.spatial import KDTree
 import tf
 import cv2
 import yaml
+import time
 
 STATE_COUNT_THRESHOLD = 3
 
@@ -23,6 +24,8 @@ class TLDetector(object):
         self.camera_image = None
         self.waypoints2d = None
         self.waypointTree = None
+        self.prevTtag = 0
+        self.startTtag = None
         self.lights = []
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
@@ -127,7 +130,15 @@ class TLDetector(object):
             return False
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-
+        #Code below is used just for capturing pictures from simulation
+        #ttag = int(round(time.time() * 1000))
+        #if self.startTtag == None:
+        #    self.startTtag = ttag
+        #ttag -= self.startTtag
+        #if (ttag - self.prevTtag) > 100:
+        #    self.prevTtag =  ttag
+        #    print("store "+ str(ttag))
+        #    cv2.imwrite('simImg/imgN'+ str(ttag)+ '.png', cv_image)
         #Get classification
         return self.light_classifier.get_classification(cv_image)
 
