@@ -9,7 +9,7 @@ BATCH_SIZE = 16
 
 LIGHT_THRESHOLD = 50 # How many pixels with certain color has to be detected to report light
 
-CLASSIFICATION = ['red', 'yellow', 'other']
+CLASSIFICATION = np.array(['red', 'yellow', 'other'])
 class TLClassifier(object):
     def __init__(self):
         #TODO load classifier
@@ -17,11 +17,12 @@ class TLClassifier(object):
 
     def preprocess_input_sim(self, image):
         #crop image
-        image = image[50:550, 100:500]
+        image = image[0:550, 100:500]
         #reduce pixel count
-        #cv2.resize(image, (250,200))
+        cv2.imshow('full', image)
+        image = cv2.resize(image, (130,180))
 
-        cv2.imshow('img', image)
+        cv2.imshow('resize', image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -37,9 +38,8 @@ class TLClassifier(object):
         #parts = tf.strings.split(file_path, '/')
         path, folder = os.path.split(file_path)
         path, folder = os.path.split(path)
-
         # The second to last is the class-directory
-        return  path == CLASSIFICATION
+        return  folder == CLASSIFICATION
 
     def list_png_paths(self, patchToData):
         matches = []
@@ -53,11 +53,11 @@ class TLClassifier(object):
         trainingList = self.list_png_paths('Training/simImg/')
         for path in trainingList:
             label = self.get_label(path)
-            cv_img = cv2.imread(path)
-            self.preprocess_input_sim(cv_img)
+            #TODO remove
+            if label[1]:
+                cv_img = cv2.imread(path)
+                self.preprocess_input_sim(cv_img)
 
-        #trainingList = self.list_png_paths('.')
-        print(trainingList)
 
     def get_classification_sim(self, image):
         pass
