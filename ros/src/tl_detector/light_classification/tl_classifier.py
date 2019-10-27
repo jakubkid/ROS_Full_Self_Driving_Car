@@ -9,6 +9,8 @@ from tensorflow.contrib.layers import flatten
 
 BATCH_SIZE = 1
 
+EPOCH_NUM = 20
+
 LIGHT_THRESHOLD = 50 # How many pixels with certain color has to be detected to report light
 
 CLASSIFICATION = np.array(['red', 'yellow', 'other'])
@@ -42,8 +44,8 @@ class TLClassifier(object):
         padding = 'VALID'
         layer1 = tf.nn.max_pool(layer1, filter_shape, strides, padding)
 
-        # Layer 2: Convolutional. Output = 44x30x16.
-        layer2Weights = tf.Variable(tf.truncated_normal([5,5,6,16], mu, sigma))
+        # Layer 2: Convolutional. Input = 48x34x6.  Output = 40x26x16.
+        layer2Weights = tf.Variable(tf.truncated_normal([9,9,6,16], mu, sigma))
         layer2Bias = tf.Variable(tf.zeros(16))
         # stride for each dimension (batch_size, height, width, depth)
         strides = [1, 1, 1, 1]
@@ -51,8 +53,7 @@ class TLClassifier(object):
         layer2Conv = tf.nn.conv2d(layer1, layer2Weights, strides, padding) + layer2Bias
         # Activation relu.
         layer2 = tf.nn.relu(layer2Conv)
- 
-        # Pooling. Input = 44x30x16. Output = 22x15x16.
+        # Pooling. Input = 40x26x16. Output = 20x13x16.
         filter_shape = [1, 2, 2, 1]
         strides = [1, 2, 2, 1]
         padding = 'VALID'
@@ -61,10 +62,10 @@ class TLClassifier(object):
         #layer2Flat = flatten(layer2)
         #layer1Flat = flatten(layer1)
         #layer2 = tf.concat(1,[layer1Flat,layer2Flat])
-        # Flatten. Input = 22x15x16. Output = 5280.
+        # Flatten. Input = 20x13x16. Output = 4160.
         layer2 = flatten(layer2)
-        # Layer 3: Fully Connected. Input = 5280. Output = 120.
-        layer3Weights = tf.Variable(tf.truncated_normal([5280, 120], mu, sigma))
+        # Layer 3: Fully Connected. Input = 4160. Output = 120.
+        layer3Weights = tf.Variable(tf.truncated_normal([4160, 120], mu, sigma))
         layer3Bias = tf.Variable(tf.zeros(120))
         layer3 = tf.add(tf.matmul(layer2, layer3Weights), layer3Bias)
         # Activation relu.
@@ -166,7 +167,7 @@ class TLClassifier(object):
             print("Training...")
             print()
             prev_valid_acc = 0.0
-            for i in range(10):
+            for i in range(EPOCH_NUM):
                 # Shuffle training data
                 combined = list(zip(X_train, y_train))
                 random.shuffle(combined)
@@ -191,9 +192,8 @@ class TLClassifier(object):
                 print("Validation Accuracy = {:.3f}".format(validation_accuracy))
                 print()
                 prev_valid_acc = validation_accuracy
-                
-            saver.save(sess, './signs')
-            print("Model saved")
+            save_path = saver.save(sess, "trainedModel/simulation.ckpt")
+            print("Model saved in path: %s" % save_path)
 
 
     def load_img_and_label(self, path):
