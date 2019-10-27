@@ -16,8 +16,15 @@ LIGHT_THRESHOLD = 50 # How many pixels with certain color has to be detected to 
 CLASSIFICATION = np.array(['red', 'yellow', 'other'])
 class TLClassifier(object):
     def __init__(self):
-        #TODO load classifier
-        pass
+        self.filePath = os.path.dirname(os.path.abspath(__file__)) # tl_classifier path
+        print("file Path: ", self.filePath)
+
+        self.sessSim = tf.Session()
+        # Load the model
+        simSaver = tf.train.import_meta_graph(self.filePath + '/trainedModel/simulation.ckpt.meta')
+        # Initialize model with training values
+        simSaver.restore(self.sessSim, self.filePath + '/trainedModel/simulation.ckpt')
+
     def LeNet(self, x):
         global layer1Conv
         global layer2Conv
@@ -95,11 +102,6 @@ class TLClassifier(object):
         #cv2.waitKey(0)
         #cv2.destroyAllWindows()
 
-        #convert to tensor flow input
-        # convert image to a 3D uint8 tensor
-        #image = tf.convert_to_tensor(image)
-        # Convert to float in the [0,1] range.
-        #image = tf.image.convert_image_dtype(image, tf.float32)
         image = image.astype(np.float32)
         image = image/255.0
         return image
@@ -122,69 +124,69 @@ class TLClassifier(object):
 
     def train_model_sim(self):
         #load training data
-        X_train = []
-        y_train = []
-        trainingList = self.list_png_paths('Training/simImg/')
+        xTrain = []
+        yTrain = []
+        trainingList = self.list_png_paths(self.filePath + '/Training/simImg/')
 
         for path in trainingList:
             (tf_img, label) = self.load_img_and_label(path)
-            X_train.append(tf_img)
-            y_train.append(label)
+            xTrain.append(tf_img)
+            yTrain.append(label)
 
         #load validation data
-        X_val = []
-        y_val = []
-        trainingList = self.list_png_paths('Validation/simImg/')
+        xVal = []
+        yVal = []
+        trainingList = self.list_png_paths(self.filePath + '/Validation/simImg/')
 
         for path in trainingList:
             (tf_img, label) = self.load_img_and_label(path)
-            X_val.append(tf_img)
-            y_val.append(label)
+            xVal.append(tf_img)
+            yVal.append(label)
         #load the model
         x = tf.placeholder(tf.float32, (None,100, 72, 3)) #input size
         y = tf.placeholder(tf.int32, (None, 3))
-        learning_rate = tf.placeholder(tf.float32, shape=[])
+        learningRate = tf.placeholder(tf.float32, shape=[])
         #one_hot_y = tf.one_hot(y, 3)
 
         rate = 0.001
 
         logits = self.LeNet(x)
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=logits)
-        loss_operation = tf.reduce_mean(cross_entropy)
-        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        training_operation = optimizer.minimize(loss_operation)
+        crossEntropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=logits)
+        lossOperation = tf.reduce_mean(crossEntropy)
+        optimizer = tf.train.AdamOptimizer(learning_rate=learningRate)
+        trainingOperation = optimizer.minimize(lossOperation)
 
-        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1))
-        accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        correctPrediction = tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1))
+        accuracyOperation = tf.reduce_mean(tf.cast(correctPrediction, tf.float32))
         saver = tf.train.Saver()
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            num_train = len(X_train)
-            num_valid = len(X_val)
-            print("num train:", num_train)
-            print("num valid:", num_valid)
+            numTrain = len(xTrain)
+            numValid = len(xVal)
+            print("num train:", numTrain)
+            print("num valid:", numValid)
             print("Training...")
             print()
             prev_valid_acc = 0.0
             for i in range(EPOCH_NUM):
                 # Shuffle training data
-                combined = list(zip(X_train, y_train))
+                combined = list(zip(xTrain, yTrain))
                 random.shuffle(combined)
-                X_train[:], y_train[:] = zip(*combined)
+                xTrain[:], yTrain[:] = zip(*combined)
                 # Train
-                for offset in range(0, num_train, BATCH_SIZE):
+                for offset in range(0, numTrain, BATCH_SIZE):
                     end = offset + BATCH_SIZE
-                    batch_x, batch_y = X_train[offset:end], y_train[offset:end]
-                    sess.run(training_operation, feed_dict={x: batch_x, y: batch_y, learning_rate: rate})
+                    batch_x, batch_y = xTrain[offset:end], yTrain[offset:end]
+                    sess.run(trainingOperation, feed_dict={x: batch_x, y: batch_y, learningRate: rate})
                 #Validate   
                 total_accuracy = 0
                 sess = tf.get_default_session()
-                for offset in range(0, num_valid, BATCH_SIZE):
-                    batch_x, batch_y = X_val[offset:offset+BATCH_SIZE], y_val[offset:offset+BATCH_SIZE]
-                    accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y})
+                for offset in range(0, numValid, BATCH_SIZE):
+                    batch_x, batch_y = xVal[offset:offset+BATCH_SIZE], yVal[offset:offset+BATCH_SIZE]
+                    accuracy = sess.run(accuracyOperation, feed_dict={x: batch_x, y: batch_y})
                     total_accuracy += (accuracy * len(batch_x))
-                validation_accuracy = total_accuracy / num_valid 
+                validation_accuracy = total_accuracy / numValid 
                 #if validation_accuracy < prev_valid_acc:
                 #    rate/=2
                 #    print("Learning rate dropped to {}".format(rate))
@@ -192,22 +194,31 @@ class TLClassifier(object):
                 print("Validation Accuracy = {:.3f}".format(validation_accuracy))
                 print()
                 prev_valid_acc = validation_accuracy
-            save_path = saver.save(sess, "trainedModel/simulation.ckpt")
+            save_path = saver.save(sess, self.filePath + '/trainedModel/simulation.ckpt')
             print("Model saved in path: %s" % save_path)
 
 
     def load_img_and_label(self, path):
         label = self.get_label(path)
-        cv_img = cv2.imread(path)
-        tf_img = self.preprocess_input_sim(cv_img)
+        cvImg = cv2.imread(path)
+        cvImg = self.preprocess_input_sim(cvImg)
         #sess = tf.InteractiveSession()
         #a = tf.Print(tf_img, [tf_img], message="This is tf_img: ")
         #a.eval()
-        return tf_img, label
+        return cvImg, label
 
 
     def get_classification_sim(self, image):
-        pass
+        image = preprocess_input_sim(image)
+        #detection =  np.argmax(self.sessSim.run(y_pred, feed_dict={x: image}), axis=1)
+        detection =  np.argmax(self.sessSim.run(logits, feed_dict={x: image}), axis=1)
+        print(CLASSIFICATION[detection])
+        if CLASSIFICATION[detection] == 'red':
+            return TrafficLight.RED
+        elif CLASSIFICATION[detection] == 'yellow':
+            return TrafficLight.YELLOW
+        else: TrafficLight.UNKNOWN
+            
 
     def get_classification_simple(self, image):
         """Determines the color of the traffic light in the image
@@ -226,13 +237,13 @@ class TLClassifier(object):
         hsv = hsv[50:550, 320:500]
         # Detect Red light
         # Range for lower red
-        lower_red = np.array([0,120,70])
-        upper_red = np.array([10,255,255])
-        mask1 = cv2.inRange(hsv, lower_red, upper_red)
+        lowerRed = np.array([0,120,70])
+        upperRed = np.array([10,255,255])
+        mask1 = cv2.inRange(hsv, lowerRed, upperRed)
         # Range for upper range
-        lower_red = np.array([170,120,70])
-        upper_red = np.array([180,255,255])
-        mask2 = cv2.inRange(hsv,lower_red,upper_red)
+        lowerRed = np.array([170,120,70])
+        upperRed = np.array([180,255,255])
+        mask2 = cv2.inRange(hsv,lowerRed,upperRed)
         # Generating the final mask to detect red color
         mask1 = mask1+mask2
         #cv2.imshow('red' ,mask1)
@@ -240,9 +251,9 @@ class TLClassifier(object):
         if nzCount > LIGHT_THRESHOLD:
             return TrafficLight.RED
         # Detect Yellow light
-        lower_yellow = np.array([25,180,100])
-        upper_yellow = np.array([35,255,255])
-        mask1 = cv2.inRange(hsv, lower_yellow, upper_yellow)
+        lowerYellow = np.array([25,180,100])
+        upperYellow = np.array([35,255,255])
+        mask1 = cv2.inRange(hsv, lowerYellow, upperYellow)
         #cv2.imshow('yellow' ,mask1)
         nzCount = cv2.countNonZero(mask1)
         if nzCount > LIGHT_THRESHOLD:
