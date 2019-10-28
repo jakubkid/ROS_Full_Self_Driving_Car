@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/jkid/CarND-Capstone/ros/src/tl_detector/light_classification/trainedModel/real.ckpt"
+all_model_checkpoint_paths: "/home/jkid/CarND-Capstone/ros/src/tl_detector/light_classification/trainedModel/real.ckpt"
