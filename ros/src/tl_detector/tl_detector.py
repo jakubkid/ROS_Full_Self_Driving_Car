@@ -140,7 +140,7 @@ class TLDetector(object):
         #    print("store "+ str(ttag))
         #    cv2.imwrite('simImg/imgN'+ str(ttag)+ '.png', cv_image)
         #Get classification
-        return self.light_classifier.get_classification(cv_image)
+        return self.light_classifier.get_classification_sim(cv_image)
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its

@@ -21,9 +21,15 @@ class TLClassifier(object):
 
         self.sessSim = tf.Session()
         # Load the model
-        simSaver = tf.train.import_meta_graph(self.filePath + '/trainedModel/simulation.ckpt.meta')
+        self.simSaver = tf.train.import_meta_graph(self.filePath + '/trainedModel/simulation.ckpt.meta')
         # Initialize model with training values
-        simSaver.restore(self.sessSim, self.filePath + '/trainedModel/simulation.ckpt')
+        self.simSaver.restore(self.sessSim, self.filePath + '/trainedModel/simulation.ckpt')
+
+        #Load model
+        graph = tf.get_default_graph()
+        self.xSim  = graph.get_tensor_by_name('xSim:0')
+        self.logitsSim = graph.get_tensor_by_name('logitSim:0')
+
 
     def LeNet(self, x):
         global layer1Conv
@@ -31,11 +37,11 @@ class TLClassifier(object):
         # Arguments used for tf.truncated_normal, randomly defines variables for the weights and biases for each layer
         mu = 0
         sigma = 0.1
-                                      
+
         # Layer 1: Convolutional. Input = 100x72x3 . Output = 96x68x6
         layer1Weights = tf.Variable(tf.truncated_normal([5,5,3,6], mu, sigma))
         layer1Bias = tf.Variable(tf.zeros(6))
-        
+
         # stride for each dimension (batch_size, height, width, depth)
         strides = [1, 1, 1, 1]
         padding = 'VALID'
@@ -44,7 +50,7 @@ class TLClassifier(object):
         layer1Conv = tf.nn.conv2d(x, layer1Weights, strides, padding) + layer1Bias
         # Activation relu.
         layer1 = tf.nn.relu(layer1Conv)
-      
+
         # Pooling. Input = 96x68x6. Output = 48x34x6.
         filter_shape = [1, 2, 2, 1]
         strides = [1, 2, 2, 1]
@@ -88,7 +94,7 @@ class TLClassifier(object):
         # Layer 5: Fully Connected. Input = 84. Output = 3.
         layer5Weights = tf.Variable(tf.truncated_normal([84, 3], mu, sigma))
         layer5Bias = tf.Variable(tf.zeros(3))
-        logits = tf.add(tf.matmul(layer4, layer5Weights), layer5Bias)
+        logits = tf.add(tf.matmul(layer4, layer5Weights), layer5Bias, name='logitSim')
         return logits
 
     def preprocess_input_sim(self, image):
@@ -143,7 +149,7 @@ class TLClassifier(object):
             xVal.append(tf_img)
             yVal.append(label)
         #load the model
-        x = tf.placeholder(tf.float32, (None,100, 72, 3)) #input size
+        x = tf.placeholder(tf.float32, (None,100, 72, 3), name='xSim') #input size
         y = tf.placeholder(tf.int32, (None, 3))
         learningRate = tf.placeholder(tf.float32, shape=[])
         #one_hot_y = tf.one_hot(y, 3)
@@ -179,14 +185,14 @@ class TLClassifier(object):
                     end = offset + BATCH_SIZE
                     batch_x, batch_y = xTrain[offset:end], yTrain[offset:end]
                     sess.run(trainingOperation, feed_dict={x: batch_x, y: batch_y, learningRate: rate})
-                #Validate   
+                #Validate
                 total_accuracy = 0
                 sess = tf.get_default_session()
                 for offset in range(0, numValid, BATCH_SIZE):
                     batch_x, batch_y = xVal[offset:offset+BATCH_SIZE], yVal[offset:offset+BATCH_SIZE]
                     accuracy = sess.run(accuracyOperation, feed_dict={x: batch_x, y: batch_y})
                     total_accuracy += (accuracy * len(batch_x))
-                validation_accuracy = total_accuracy / numValid 
+                validation_accuracy = total_accuracy / numValid
                 #if validation_accuracy < prev_valid_acc:
                 #    rate/=2
                 #    print("Learning rate dropped to {}".format(rate))
@@ -209,16 +215,17 @@ class TLClassifier(object):
 
 
     def get_classification_sim(self, image):
-        image = preprocess_input_sim(image)
+        image = self.preprocess_input_sim(image)
+        images = [image]
         #detection =  np.argmax(self.sessSim.run(y_pred, feed_dict={x: image}), axis=1)
-        detection =  np.argmax(self.sessSim.run(logits, feed_dict={x: image}), axis=1)
+        detection =  np.argmax(self.sessSim.run(self.logitsSim, feed_dict={self.xSim: images}), axis=1)
         print(CLASSIFICATION[detection])
         if CLASSIFICATION[detection] == 'red':
             return TrafficLight.RED
         elif CLASSIFICATION[detection] == 'yellow':
             return TrafficLight.YELLOW
         else: TrafficLight.UNKNOWN
-            
+
 
     def get_classification_simple(self, image):
         """Determines the color of the traffic light in the image
