@@ -6,7 +6,7 @@ from styx_msgs.msg import TrafficLightArray, TrafficLight
 from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-from light_classification.tl_classifier import TLClassifier
+from light_classification.tl_classifier_sim import TLClassifierSim
 from scipy.spatial import KDTree
 import tf
 import cv2
@@ -47,7 +47,7 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+        self.light_classifier = TLClassifierSim()
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -140,7 +140,7 @@ class TLDetector(object):
         #    print("store "+ str(ttag))
         #    cv2.imwrite('simImg/imgN'+ str(ttag)+ '.png', cv_image)
         #Get classification
-        return self.light_classifier.get_classification_sim(cv_image)
+        return self.light_classifier.get_classification(cv_image)
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its

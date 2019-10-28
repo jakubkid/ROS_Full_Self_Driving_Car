@@ -7,14 +7,14 @@ import tensorflow as tf
 import random
 from tensorflow.contrib.layers import flatten
 
-BATCH_SIZE = 1
+BATCH_SIZE = 1 # Training batch size
 
-EPOCH_NUM = 20
+EPOCH_NUM = 20 # Number of traininig epochs
 
 LIGHT_THRESHOLD = 50 # How many pixels with certain color has to be detected to report light
 
 CLASSIFICATION = np.array(['red', 'yellow', 'other'])
-class TLClassifier(object):
+class TLClassifierSim(object):
     def __init__(self):
         self.filePath = os.path.dirname(os.path.abspath(__file__)) # tl_classifier path
         print("file Path: ", self.filePath)
@@ -30,10 +30,30 @@ class TLClassifier(object):
         self.xSim  = graph.get_tensor_by_name('xSim:0')
         self.logitsSim = graph.get_tensor_by_name('logitSim:0')
 
+    def get_label(self, file_path):
+        # convert the path to a list of path components
+        #parts = tf.strings.split(file_path, '/')
+        path, folder = os.path.split(file_path)
+        path, folder = os.path.split(path)
+        # The second to last is the class-directory
+        #return  tf.convert_to_tensor((folder == CLASSIFICATION).astype(np.int32))
+        return (folder == CLASSIFICATION).astype(np.int32)
 
-    def LeNet(self, x):
-        global layer1Conv
-        global layer2Conv
+    def list_png_paths(self, patchToData):
+        matches = []
+        for root, dirnames, filenames in os.walk(patchToData):
+            for filename in fnmatch.filter(filenames, '*.png'):
+                matches.append(os.path.join(root, filename))
+        return matches
+
+    def load_img_and_label(self, path):
+        label = self.get_label(path)
+        cvImg = cv2.imread(path)
+        cvImg = self.preprocess_input_sim(cvImg)
+        return cvImg, label
+
+
+    def LeNet_sim(self, x):
         # Arguments used for tf.truncated_normal, randomly defines variables for the weights and biases for each layer
         mu = 0
         sigma = 0.1
@@ -112,22 +132,6 @@ class TLClassifier(object):
         image = image/255.0
         return image
 
-    def get_label(self, file_path):
-        # convert the path to a list of path components
-        #parts = tf.strings.split(file_path, '/')
-        path, folder = os.path.split(file_path)
-        path, folder = os.path.split(path)
-        # The second to last is the class-directory
-        #return  tf.convert_to_tensor((folder == CLASSIFICATION).astype(np.int32))
-        return (folder == CLASSIFICATION).astype(np.int32)
-
-    def list_png_paths(self, patchToData):
-        matches = []
-        for root, dirnames, filenames in os.walk(patchToData):
-            for filename in fnmatch.filter(filenames, '*.png'):
-                matches.append(os.path.join(root, filename))
-        return matches
-
     def train_model_sim(self):
         #load training data
         xTrain = []
@@ -156,7 +160,7 @@ class TLClassifier(object):
 
         rate = 0.001
 
-        logits = self.LeNet(x)
+        logits = self.LeNet_sim(x)
         crossEntropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=logits)
         lossOperation = tf.reduce_mean(crossEntropy)
         optimizer = tf.train.AdamOptimizer(learning_rate=learningRate)
@@ -204,16 +208,6 @@ class TLClassifier(object):
             print("Model saved in path: %s" % save_path)
 
 
-    def load_img_and_label(self, path):
-        label = self.get_label(path)
-        cvImg = cv2.imread(path)
-        cvImg = self.preprocess_input_sim(cvImg)
-        #sess = tf.InteractiveSession()
-        #a = tf.Print(tf_img, [tf_img], message="This is tf_img: ")
-        #a.eval()
-        return cvImg, label
-
-
     def get_classification_sim(self, image):
         image = self.preprocess_input_sim(image)
         images = [image]
@@ -230,7 +224,7 @@ class TLClassifier(object):
         else: TrafficLight.UNKNOWN
 
 
-    def get_classification_simple(self, image):
+    def get_classification(self, image):
         """Determines the color of the traffic light in the image
 
         Args:
