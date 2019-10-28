@@ -91,10 +91,6 @@ class TLClassifierSim(object):
         strides = [1, 2, 2, 1]
         padding = 'VALID'
         layer2 = tf.nn.max_pool(layer2,filter_shape, strides, padding)
-        # Flatten. Input = 5x5x16,14x14x6. Output = 1576.
-        #layer2Flat = flatten(layer2)
-        #layer1Flat = flatten(layer1)
-        #layer2 = tf.concat(1,[layer1Flat,layer2Flat])
         # Flatten. Input = 20x13x16. Output = 4160.
         layer2 = flatten(layer2)
         # Layer 3: Fully Connected. Input = 4160. Output = 120.
