@@ -218,7 +218,10 @@ class TLClassifier(object):
         image = self.preprocess_input_sim(image)
         images = [image]
         #detection =  np.argmax(self.sessSim.run(y_pred, feed_dict={x: image}), axis=1)
-        detection =  np.argmax(self.sessSim.run(self.logitsSim, feed_dict={self.xSim: images}), axis=1)
+        classificationOutput = self.sessSim.run(self.logitsSim, feed_dict={self.xSim: images})
+        detection =  np.argmax(classificationOutput, axis=1)
+        print(classificationOutput)
+        print(detection)
         print(CLASSIFICATION[detection])
         if CLASSIFICATION[detection] == 'red':
             return TrafficLight.RED
