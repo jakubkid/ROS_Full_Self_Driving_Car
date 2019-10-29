@@ -62,6 +62,7 @@ Before real image is inputted to the [model](https://github.com/jakubkid/ROS_Ful
 #### 4. Real Model Architecture.
 
 Real model consisted of the following layers:
+
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
 | Input         		| 60x144x3 RGB image   					        | 
@@ -84,65 +85,66 @@ Real model consisted of the following layers:
 
 To train the model, I used AdamOptimizer to minimize loss operation of training set. I set batch size to 1 and with 20 epochs with learning rate with 0.001:
 
-EPOCH 1 ...
-Validation Accuracy = 0.686
-()
-EPOCH 2 ...
-Validation Accuracy = 0.714
-()
-EPOCH 3 ...
-Validation Accuracy = 0.693
-()
-EPOCH 4 ...
-Validation Accuracy = 0.864
-()
-EPOCH 5 ...
-Validation Accuracy = 0.879
-()
-EPOCH 6 ...
-Validation Accuracy = 0.829
-()
-EPOCH 7 ...
-Validation Accuracy = 0.864
-()
-EPOCH 8 ...
-Validation Accuracy = 0.886
-()
-EPOCH 9 ...
-Validation Accuracy = 0.893
-()
-EPOCH 10 ...
-Validation Accuracy = 0.879
-()
-EPOCH 11 ...
-Validation Accuracy = 0.879
-()
-EPOCH 12 ...
-Validation Accuracy = 0.800
-()
-EPOCH 13 ...
-Validation Accuracy = 0.886
-()
-EPOCH 14 ...
-Validation Accuracy = 0.907
-()
-EPOCH 15 ...
-Validation Accuracy = 0.871
-()
-EPOCH 16 ...
-Validation Accuracy = 0.900
-()
-EPOCH 17 ...
-Validation Accuracy = 0.907
-()
-EPOCH 18 ...
-Validation Accuracy = 0.893
-()
-EPOCH 19 ...
-Validation Accuracy = 0.907
-()
-EPOCH 20 ...
-Validation Accuracy = 0.879
+>EPOCH 1 ...
+>Validation Accuracy = 0.686
+>
+>EPOCH 2 ...
+>Validation Accuracy = 0.714
+>
+>EPOCH 3 ...
+>Validation Accuracy = 0.693
+>
+>EPOCH 4 ...
+>Validation Accuracy = 0.864
+>
+>EPOCH 5 ...
+>Validation Accuracy = 0.879
+>
+>EPOCH 6 ...
+>Validation Accuracy = 0.829
+>
+>EPOCH 7 ...
+>Validation Accuracy = 0.864
+>
+>EPOCH 8 ...
+>Validation Accuracy = 0.886
+>
+>EPOCH 9 ...
+>Validation Accuracy = 0.893
+>
+>EPOCH 10 ...
+>Validation Accuracy = 0.879
+>
+>EPOCH 11 ...
+>Validation Accuracy = 0.879
+>
+>EPOCH 12 ...
+>Validation Accuracy = 0.800
+>
+>EPOCH 13 ...
+>Validation Accuracy = 0.886
+>
+>EPOCH 14 ...
+>Validation Accuracy = 0.907
+>
+>EPOCH 15 ...
+>Validation Accuracy = 0.871
+>
+>EPOCH 16 ...
+>Validation Accuracy = 0.900
+>
+>EPOCH 17 ...
+>Validation Accuracy = 0.907
+>
+>EPOCH 18 ...
+>Validation Accuracy = 0.893
+>
+>EPOCH 19 ...
+>Validation Accuracy = 0.907
+>
+>EPOCH 20 ...
+>Validation Accuracy = 0.879
+>
 
 After training model is stored as [real.ckpt](https://github.com/jakubkid/ROS_Full_Self_Driving_Car/blob/master/ros/src/tl_detector/light_classification/trainedModel/)
 
@@ -155,21 +157,21 @@ Before simulation image is inputted to the [model](https://github.com/jakubkid/R
 
 Simulation model consisted of the following layers:
 
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 100x72x3 RGB image   					        | 
-| Convolution 5x5     	| 1x1 stride, valid padding, outputs 96x68x6 	|
+| Layer					|		Description								|
+|:---------------------:|:---------------------------------------------:|
+| Input					| 100x72x3 RGB image   							|
+| Convolution 5x5		| 1x1 stride, valid padding, outputs 96x68x6 	|
 | RELU					|												|
-| Max pooling 2x2      	| 2x2 stride, outputs 48x34x6.					|
-| Convolution 5x5	    | 1x1 stride, valid padding, outputs 40x26x16  	|
+| Max pooling 2x2		| 2x2 stride, outputs 48x34x6.					|
+| Convolution 5x5		| 1x1 stride, valid padding, outputs 40x26x16	|
 | RELU					|												|
-| Max pooling 2x2      	| 2x2 stride, outputs 20x13x16					|
-| Flatten Layer1&2		| 20x13x16 = 4160							|
-| Fully connected		| 4160->120    									|
+| Max pooling 2x2		| 2x2 stride, outputs 20x13x16					|
+| Flatten Layer1&2		| 20x13x16 = 4160								|
+| Fully connected		| 4160->120										|
 | RELU					|												|
-| Fully connected		| 120->84    									|
+| Fully connected		| 120->84										|
 | sigmoid				|												|
-| Fully connected		| 84->43    									|
+| Fully connected		| 84->43										|
  
 
 
@@ -177,65 +179,66 @@ Simulation model consisted of the following layers:
 
 To train the model, I used AdamOptimizer to minimize loss operation of training set. I set batch size to 1 and with 20 epochs with learning rate with 0.001:
 
-EPOCH 1 ...
-Validation Accuracy = 0.713
-()
-EPOCH 2 ...
-Validation Accuracy = 0.723
-()
-EPOCH 3 ...
-Validation Accuracy = 0.819
-()
-EPOCH 4 ...
-Validation Accuracy = 0.862
-()
-EPOCH 5 ...
-Validation Accuracy = 0.862
-()
-EPOCH 6 ...
-Validation Accuracy = 0.851
-()
-EPOCH 7 ...
-Validation Accuracy = 0.872
-()
-EPOCH 8 ...
-Validation Accuracy = 0.894
-()
-EPOCH 9 ...
-Validation Accuracy = 0.926
-()
-EPOCH 10 ...
-Validation Accuracy = 0.904
-()
-EPOCH 11 ...
-Validation Accuracy = 0.915
-()
-EPOCH 12 ...
-Validation Accuracy = 0.926
-()
-EPOCH 13 ...
-Validation Accuracy = 0.926
-()
-EPOCH 14 ...
-Validation Accuracy = 0.926
-()
-EPOCH 15 ...
-Validation Accuracy = 0.936
-()
-EPOCH 16 ...
-Validation Accuracy = 0.947
-()
-EPOCH 17 ...
-Validation Accuracy = 0.947
-()
-EPOCH 18 ...
-Validation Accuracy = 0.947
-()
-EPOCH 19 ...
-Validation Accuracy = 0.947
-()
-EPOCH 20 ...
-Validation Accuracy = 0.947
+>EPOCH 1 ...
+>Validation Accuracy = 0.713
+>
+>EPOCH 2 ...
+>Validation Accuracy = 0.723
+>
+>EPOCH 3 ...
+>Validation Accuracy = 0.819
+>
+>EPOCH 4 ...
+>Validation Accuracy = 0.862
+>
+>EPOCH 5 ...
+>Validation Accuracy = 0.862
+>
+>EPOCH 6 ...
+>Validation Accuracy = 0.851
+>
+>EPOCH 7 ...
+>Validation Accuracy = 0.872
+>
+>EPOCH 8 ...
+>Validation Accuracy = 0.894
+>
+>EPOCH 9 ...
+>Validation Accuracy = 0.926
+>
+>EPOCH 10 ...
+>Validation Accuracy = 0.904
+>
+>EPOCH 11 ...
+>Validation Accuracy = 0.915
+>
+>EPOCH 12 ...
+>Validation Accuracy = 0.926
+>
+>EPOCH 13 ...
+>Validation Accuracy = 0.926
+>
+>EPOCH 14 ...
+>Validation Accuracy = 0.926
+>
+>EPOCH 15 ...
+>Validation Accuracy = 0.936
+>
+>EPOCH 16 ...
+>Validation Accuracy = 0.947
+>
+>EPOCH 17 ...
+>Validation Accuracy = 0.947
+>
+>EPOCH 18 ...
+>Validation Accuracy = 0.947
+>
+>EPOCH 19 ...
+>Validation Accuracy = 0.947
+>
+>EPOCH 20 ...
+>Validation Accuracy = 0.947
+>
 
 After training model is stored as [simulation.ckpt](https://github.com/jakubkid/ROS_Full_Self_Driving_Car/blob/master/ros/src/tl_detector/light_classification/trainedModel/)
 
