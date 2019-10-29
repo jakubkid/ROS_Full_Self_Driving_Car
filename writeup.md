@@ -6,12 +6,12 @@
 [//]: # (Image References)
 
 [rosArchitecture]: ./reportImgs/rosModel.PNG "System Architecture Diagram"
-[fullReal]: ./reportImgs/fullReal.PNG "Full image from real run"
-[cropReal]: ./reportImgs/cropReal.PNG "Cropped image from real run"
-[resizeReal]: ./reportImgs/resizeReal.PNG "Resized image from real run"
-[fullSim]: ./reportImgs/fullSim.PNG "Full image from simulation run"
-[cropSim]: ./reportImgs/cropSim.PNG "Cropped image from simulation run"
-[resizeSim]: ./reportImgs/resizeSim.PNG "Resized image from simulation run"
+[fullReal]: ./reportImgs/fullReal.png "Full image from real run"
+[cropReal]: ./reportImgs/cropReal.png "Cropped image from real run"
+[resizeReal]: ./reportImgs/resizeReal.png "Resized image from real run"
+[fullSim]: ./reportImgs/fullSim.png "Full image from simulation run"
+[cropSim]: ./reportImgs/cropSim.png "Cropped image from simulation run"
+[resizeSim]: ./reportImgs/resizeSim.png "Resized image from simulation run"
 ---
 ### Reflection
 
