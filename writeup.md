@@ -65,6 +65,7 @@ Before real image is inputted to the [model](https://github.com/jakubkid/ROS_Ful
 |Full image                                                                             |
 |:-------------------------------------------------------------------------------------:|
 |![Full image from real run][fullReal]                                                  |
+
 |Cropped image                             |  Resized image                             |
 |:----------------------------------------:|:------------------------------------------:|
 |![Cropped image from real run][cropReal]  |  ![Resized image from real run][resizeReal]|
@@ -165,6 +166,7 @@ Before simulation image is inputted to the [model](https://github.com/jakubkid/R
 |Full image                                                                                      |
 |:----------------------------------------------------------------------------------------------:|                                                                                    |
 |![Full image from simulation run][fullSim]                                                      |
+
 |Cropped image                                  |  Resized image                                 |
 |:---------------------------------------------:|:----------------------------------------------:|
 |![Cropped image from simulation run][cropSim]  | ![Resized image from simulation run][resizeSim]|
