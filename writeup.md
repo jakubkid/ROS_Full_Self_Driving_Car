@@ -6,9 +6,12 @@
 [//]: # (Image References)
 
 [rosArchitecture]: ./reportImgs/rosModel.PNG "System Architecture Diagram"
-
-
-
+[fullReal]: ./reportImgs/fullReal.PNG "Full image from real run"
+[cropReal]: ./reportImgs/cropReal.PNG "Cropped image from real run"
+[resizeReal]: ./reportImgs/resizeReal.PNG "Resized image from real run"
+[fullSim]: ./reportImgs/fullSim.PNG "Full image from simulation run"
+[cropSim]: ./reportImgs/cropSim.PNG "Cropped image from simulation run"
+[resizeSim]: ./reportImgs/resizeSim.PNG "Resized image from simulation run"
 ---
 ### Reflection
 
@@ -58,6 +61,13 @@ Because of that training and validation set is quite small
 #### 3. Real image preprocessing:
 
 Before real image is inputted to the [model](https://github.com/jakubkid/ROS_Full_Self_Driving_Car/blob/master/ros/src/tl_detector/light_classification/tl_classifier_real.py) it is preprocessed to decrease its size. It is first cropped to 30:270 and 0:572 and then it is shrinked to  (60, 144)
+
+|Full image                                                                             |
+|![Full image from real run][fullReal]                                                  |
+|:-------------------------------------------------------------------------------------:|
+|Cropped image                             |  Resized image                             |
+|:----------------------------------------:|:------------------------------------------:|
+|![Cropped image from real run][cropReal]  |  ![Resized image from real run][resizeReal]|
 
 #### 4. Real Model Architecture.
 
@@ -151,6 +161,13 @@ After training model is stored as [real.ckpt](https://github.com/jakubkid/ROS_Fu
 #### 6. Simulation image preprocessing:
 
 Before simulation image is inputted to the [model](https://github.com/jakubkid/ROS_Full_Self_Driving_Car/blob/master/ros/src/tl_detector/light_classification/tl_classifier_sim.py) it is preprocessed to decrease its size. It is first cropped to 0:550 and 100:500 and then it is shrinked to  (100, 72)
+
+|Full image                                                                                      |
+|![Full image from simulation run][fullSim]                                                      |
+|:----------------------------------------------------------------------------------------------:|
+|Cropped image                                  |  Resized image                                 |
+|:---------------------------------------------:|:----------------------------------------------:|
+|![Cropped image from simulation run][cropSim]  |  ![Resized image from simulation run][resizeSim]|
 
 #### 7. Simulation Model Architecture.
 
