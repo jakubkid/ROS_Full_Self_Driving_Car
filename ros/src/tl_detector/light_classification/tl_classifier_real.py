@@ -21,14 +21,14 @@ class TLClassifierReal(object):
 
         self.sessReal = tf.Session()
         # Load the model
-        #self.realSaver = tf.train.import_meta_graph(self.filePath + '/trainedModel/real.ckpt.meta')
+        self.realSaver = tf.train.import_meta_graph(self.filePath + '/trainedModel/real.ckpt.meta')
         # Initialize model with training values
-        #self.realSaver.restore(self.sessReal, self.filePath + '/trainedModel/real.ckpt')
+        self.realSaver.restore(self.sessReal, self.filePath + '/trainedModel/real.ckpt')
 
         #Load model
-        #graph = tf.get_default_graph()
-        #self.xReal  = graph.get_tensor_by_name('xReal:0')
-        #self.logitsReal = graph.get_tensor_by_name('logitReal:0')
+        graph = tf.get_default_graph()
+        self.xReal  = graph.get_tensor_by_name('xReal:0')
+        self.logitsReal = graph.get_tensor_by_name('logitReal:0')
 
     def get_label(self, file_path):
         # convert the path to a list of path components
@@ -116,12 +116,15 @@ class TLClassifierReal(object):
     def preprocess_input_real(self, image):
         #crop image
         #cv2.imshow('full', image)
+        #cv2.imwrite('fullReal.png',image)
         image = image[30:270, 0:572]
         #reduce pixel countrandom.shuffle
         #cv2.imshow('crop', image)
+        #cv2.imwrite('cropReal.png',image)
         image = cv2.resize(image, (144, 60))
         #image = cv2.resize(image, (200, 80))
         #cv2.imshow('resize', image)
+        #cv2.imwrite('resizeReal.png',image)
         #cv2.waitKey(0)
         #cv2.destroyAllWindows()
 

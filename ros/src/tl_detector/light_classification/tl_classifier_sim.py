@@ -115,12 +115,16 @@ class TLClassifierSim(object):
 
     def preprocess_input_sim(self, image):
         #crop image
+        #cv2.imshow('full', image)
+        #cv2.imwrite('fullSim.png',image)
         image = image[0:550, 100:500]
         #reduce pixel countrandom.shuffle
-        #cv2.imshow('full', image)
+        #cv2.imshow('crop', image)
+        #cv2.imwrite('cropSim.png',image)
         image = cv2.resize(image, (72,100))
 
         #cv2.imshow('resize', image)
+        #cv2.imwrite('resizeSim.png',image)
         #cv2.waitKey(0)
         #cv2.destroyAllWindows()
 
