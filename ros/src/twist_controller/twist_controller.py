@@ -51,7 +51,6 @@ class Controller(object):
             #We are stopped hold the break
             throttle = 0;
             brake = 400 #Nm - to hold the car in place
-        # TODO this could be done by converting PID output to Nm?
         elif throttle < 0.1 and velError < 0:
             throttle = 0
             decel = max(velError, self.decLimit)
